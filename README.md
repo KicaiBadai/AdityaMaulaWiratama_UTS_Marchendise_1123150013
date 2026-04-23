@@ -8,7 +8,7 @@
 | **Kelas**             | TI SE 23 P1            |
 | **Program Studi**     | Teknik Informatika     |
 | **Peminatan**         | Software Engineering   |
-| **Link Demo YouTube** | [Klik di sini]([https://youtube.com](https://youtu.be/B-fyerymbI4)) |
+| **Link Demo YouTube** | [Klik di sini](https://youtu.be/B-fyerymbI4) |
 
 ---
 
