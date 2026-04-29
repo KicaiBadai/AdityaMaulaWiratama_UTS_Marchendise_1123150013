@@ -1,16 +1,19 @@
-import 'package:flutter/material.dart'; // Perbaikan di sini
-import 'package:firebase_core/firebase_core.dart'; // Perbaikan di sini
-import 'package:provider/provider.dart'; // Perbaikan di sini
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+
+// Import file lokal (sesuaikan path jika berbeda)
 import 'firebase_options.dart';
 import 'core/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/presentation/providers/auth_provider.dart';
 import 'features/dashboard/domain/repositories/product_provider.dart';
+import 'core/providers/theme_provider.dart'; // Pastikan path ini benar
 
 void main() async {
-  // Pastikan binding sudah terinisialisasi sebelum panggil async codes
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inisialisasi Firebase
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -19,7 +22,16 @@ void main() async {
     debugPrint('Error initializing Firebase: $e');
   }
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,18 +39,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ProductProvider()),
-      ],
-      child: MaterialApp(
-        title: 'My App',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        initialRoute: AppRouter.splash,
-        onGenerateRoute: AppRouter.onGenerateRoute,
-      ),
+    // Watch ThemeProvider agar widget build ulang saat tema berubah
+    final themeProvider = context.watch<ThemeProvider>();
+
+    return MaterialApp(
+      title: 'Pasar Malam',
+      debugShowCheckedModeBanner: false,
+
+      // Pengaturan Tema
+      theme: AppTheme.light, // Tema Terang
+      darkTheme: AppTheme.dark, // Tema Gelap
+      themeMode: themeProvider.themeMode, // Mode aktif (Light/Dark)
+      // Pengaturan Navigasi
+      initialRoute: AppRouter.splash,
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }
