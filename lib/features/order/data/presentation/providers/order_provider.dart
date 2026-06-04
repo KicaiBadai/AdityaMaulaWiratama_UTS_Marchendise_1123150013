@@ -1,32 +1,44 @@
-// features/order/presentation/providers/order_provider.dart
 import 'package:flutter/material.dart';
-import '../../../data/repositories/order_repository_impl.dart';
-import '../../../domain/repositories/order_repository.dart';
-import '../../models/order_model.dart';
+import 'package:uts_1123150013/features/order/data/models/order_model.dart';
+import 'package:uts_1123150013/features/order/data/repositories/order_repository_impl.dart';
+import 'package:uts_1123150013/features/order/domain/repositories/order_repository.dart';
 
 enum OrderStatus { initial, loading, success, error }
 
 class OrderProvider extends ChangeNotifier {
   final OrderRepository _repository = OrderRepositoryImpl();
 
+  // State untuk checkout
   OrderStatus _checkoutStatus = OrderStatus.initial;
   OrderModel? _lastOrder;
+  String? _checkoutError;
+
+  // State untuk daftar pesanan
   List<OrderModel> _orders = [];
-  String? _error;
+  OrderStatus _ordersStatus = OrderStatus.initial;
+  String? _ordersError;
 
   // Getters
   OrderStatus get checkoutStatus => _checkoutStatus;
   OrderModel? get lastOrder => _lastOrder;
-  List<OrderModel> get orders => _orders;
-  String? get error => _error;
 
+  /// Getter error untuk kompatibilitas dengan kode dosen
+  String? get error => _checkoutError; // ← tambahkan ini!
+
+  String? get checkoutError => _checkoutError;
+
+  List<OrderModel> get orders => _orders;
+  OrderStatus get ordersStatus => _ordersStatus;
+  String? get ordersError => _ordersError;
+
+  // Method checkout (sudah ada)
   Future<bool> checkout({
     required String shippingAddress,
     String? notes,
     required String paymentMethod,
   }) async {
     _checkoutStatus = OrderStatus.loading;
-    _error = null;
+    _checkoutError = null;
     notifyListeners();
 
     try {
@@ -40,28 +52,35 @@ class OrderProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _checkoutStatus = OrderStatus.error;
-      _error = e.toString();
+      _checkoutError = e.toString();
       notifyListeners();
       return false;
     }
   }
 
-  Future<void> loadMyOrders({int page = 1, int limit = 10}) async {
+  // Method untuk mengambil daftar pesanan (dipanggil dari MyOrdersPage)
+  Future<void> fetchMyOrders({int page = 1, int limit = 10}) async {
+    _ordersStatus = OrderStatus.loading;
+    _ordersError = null;
+    notifyListeners();
+
     try {
       _orders = await _repository.getMyOrders(page: page, limit: limit);
-      notifyListeners();
+      _ordersStatus = OrderStatus.success;
     } catch (e) {
-      _error = e.toString();
+      _ordersStatus = OrderStatus.error;
+      _ordersError = e.toString();
+    } finally {
       notifyListeners();
     }
   }
 
-  Future<OrderModel?> loadOrderDetail(int orderId) async {
+  // Method untuk detail order (opsional)
+  Future<OrderModel?> getOrderDetail(int orderId) async {
     try {
-      final order = await _repository.getOrderDetail(orderId);
-      return order;
+      return await _repository.getOrderDetail(orderId);
     } catch (e) {
-      _error = e.toString();
+      _ordersError = e.toString();
       notifyListeners();
       return null;
     }
@@ -70,7 +89,7 @@ class OrderProvider extends ChangeNotifier {
   void resetCheckout() {
     _checkoutStatus = OrderStatus.initial;
     _lastOrder = null;
-    _error = null;
+    _checkoutError = null;
     notifyListeners();
   }
 }
