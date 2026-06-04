@@ -9,6 +9,8 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/data/presentation/providers/auth_provider.dart';
 import 'features/dashboard/domain/repositories/product_provider.dart';
 import 'core/providers/theme_provider.dart'; // Pastikan path ini benar
+import 'features/order/data/presentation/providers/order_provider.dart';
+import 'features/cart/data/presentation/providers/cart_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +30,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: const MyApp(),
     ),

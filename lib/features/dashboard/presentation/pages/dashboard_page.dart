@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Import internal (pastikan path sesuai dengan project kamu)
 import '../../domain/repositories/product_provider.dart';
 import '../../data/models/product_model.dart';
 import '../widgets/product_card.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/providers/theme_provider.dart'; // Import ThemeProvider
+import '../../../../core/providers/theme_provider.dart';
+import '../../../cart/data/presentation/providers/cart_provider.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -31,9 +31,9 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    // Memanggil data saat pertama kali page dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().fetchProducts();
+      context.read<CartProvider>().fetchCart(); // ambil data cart untuk badge
     });
   }
 
@@ -43,10 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
-  // --- LOGIC HELPER ---
-
   String _formatPrice(double price) {
-    // Cara simpel formatting rupiah tanpa library intl
     final str = price.toInt().toString();
     final regex = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     return 'Rp ${str.replaceAllMapped(regex, (Match m) => '${m[1]}.')}';
@@ -66,11 +63,11 @@ class _DashboardPageState extends State<DashboardPage> {
     }).toList();
   }
 
-  // --- UI COMPONENTS ---
-
   @override
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
+    final cartProvider = context.watch<CartProvider>();
+    final cartCount = cartProvider.itemCount;
 
     return Scaffold(
       body: SafeArea(
@@ -81,17 +78,20 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: _buildBottomNavigationBar(cartCount),
     );
   }
 
   Widget _buildBody(ProductProvider provider) {
-    return switch (provider.status) {
-      ProductStatus.loading ||
-      ProductStatus.initial => const Center(child: CircularProgressIndicator()),
-      ProductStatus.error => _buildErrorState(provider),
-      ProductStatus.loaded => _buildProductGrid(provider.products),
-    };
+    switch (provider.status) {
+      case ProductStatus.loading:
+      case ProductStatus.initial:
+        return const Center(child: CircularProgressIndicator());
+      case ProductStatus.error:
+        return _buildErrorState(provider);
+      case ProductStatus.loaded:
+        return _buildProductGrid(provider.products);
+    }
   }
 
   Widget _buildHeader() {
@@ -218,7 +218,7 @@ class _DashboardPageState extends State<DashboardPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.error_outline, size: 48, color: Colors.red),
-        Text(provider.error ?? 'Error'),
+        Text(provider.error ?? 'Terjadi kesalahan'),
         ElevatedButton(
           onPressed: () => provider.fetchProducts(),
           child: const Text('Coba Lagi'),
@@ -266,17 +266,49 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(int cartCount) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       onTap: (index) => setState(() => _selectedIndex = index),
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColors.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Fav'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+      items: [
+        const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(
+          icon: Stack(
+            children: [
+              const Icon(Icons.shopping_cart),
+              if (cartCount > 0)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$cartCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          label: 'Cart',
+        ),
+        const BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Fav'),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
       ],
     );
   }
