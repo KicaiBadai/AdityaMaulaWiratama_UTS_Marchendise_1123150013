@@ -8,6 +8,9 @@ import 'package:uts_1123150013/features/dashboard/presentation/pages/dashboard_p
 import 'package:uts_1123150013/core/pages/splash_page.dart';
 import 'package:uts_1123150013/features/cart/data/presentation/pages/cart_pages.dart';
 import 'package:uts_1123150013/features/order/data/presentation/pages/checkout_page.dart';
+import 'package:uts_1123150013/features/order/data/presentation/pages/order_success_page.dart';
+import 'package:uts_1123150013/features/order/data/presentation/pages/payment_pending_page.dart';
+import 'package:uts_1123150013/features/order/data/models/order_model.dart';
 
 class AppRouter {
   // Auth Routes
@@ -29,12 +32,13 @@ class AppRouter {
   static const String account = '/account';
   static const String profile = '/profile';
 
-  // Order / Checkout
-  static const String checkout = '/checkout'; // ✅ Tambahkan ini
+  // Order Routes
+  static const String myOrders = '/my-orders';
 
-   // Order / Checkout
-  static const String paymentPending = '/payment-pending'; // ✅ tambah
-  static const String orderSuccess = '/order-success'; // ✅ tambah
+  // Order / Checkout
+  static const String checkout = '/checkout';
+  static const String paymentPending = '/payment-pending';
+  static const String orderSuccess = '/order-success';
 
   // Settings
   static const String settings = '/settings';
@@ -62,23 +66,34 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const AuthGuard(child: DashboardPage()),
         );
-      case paymentPending: // ✅ tambah
+      case paymentPending:
+        final order = settings.arguments as OrderModel?;
+        if (order == null) {
+          // Fallback ke dashboard jika tidak ada argumen
+          return MaterialPageRoute(
+            builder: (_) => const AuthGuard(child: DashboardPage()),
+          );
+        }
         return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: PaymentPendingPage()),
-        );  
-      case orderSuccess: // ✅ tambah
+          builder: (_) => AuthGuard(child: PaymentPendingPage(order: order)),
+        );
+      case orderSuccess:
+        final order = settings.arguments as OrderModel?;
+        if (order == null) {
+          return MaterialPageRoute(
+            builder: (_) => const AuthGuard(child: DashboardPage()),
+          );
+        }
         return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: OrderSuccessPage()),
+          builder: (_) => AuthGuard(child: OrderSuccessPage(order: order)),
         );
       case products:
         return MaterialPageRoute(
           builder: (_) => const AuthGuard(child: DashboardPage()),
         );
-      case checkout: // ✅ Tambahkan handling rute checkout
+      case checkout:
         return MaterialPageRoute(
-          builder: (_) => const AuthGuard(
-            child: CheckoutPage(),
-          ), // Ganti dengan widget halaman checkout Anda
+          builder: (_) => const AuthGuard(child: CheckoutPage()),
         );
       default:
         return MaterialPageRoute(builder: (_) => const LoginPage());

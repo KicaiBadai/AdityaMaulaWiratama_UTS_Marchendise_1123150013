@@ -44,6 +44,10 @@ class OrderModel {
   final List<OrderItemModel> items;
   final String createdAt;
 
+  // Tambahan untuk Virtual Account dan GoPay deeplink
+  final String? vaNumber;
+  final String? gopayDeeplink;
+
   const OrderModel({
     required this.id,
     required this.totalAmount,
@@ -53,6 +57,8 @@ class OrderModel {
     required this.paymentMethod,
     required this.items,
     required this.createdAt,
+    this.vaNumber,
+    this.gopayDeeplink,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -69,6 +75,8 @@ class OrderModel {
       paymentMethod: json['payment_method'] as String? ?? '',
       items: itemsList,
       createdAt: json['created_at'] as String? ?? '',
+      vaNumber: json['va_number'] as String?,
+      gopayDeeplink: json['gopay_deeplink'] as String?,
     );
   }
 
@@ -81,5 +89,7 @@ class OrderModel {
     'payment_method': paymentMethod,
     'items': items.map((e) => e.toJson()).toList(),
     'created_at': createdAt,
+    if (vaNumber != null) 'va_number': vaNumber,
+    if (gopayDeeplink != null) 'gopay_deeplink': gopayDeeplink,
   };
 }
