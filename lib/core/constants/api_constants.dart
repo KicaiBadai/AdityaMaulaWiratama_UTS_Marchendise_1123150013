@@ -14,4 +14,8 @@ class ApiConstants {
   // Timeout (naikkan sedikit)
   static const int connectTimeout = 30000; // 30 detik
   static const int receiveTimeout = 30000; // 30 detik
+  static const String cart = '/v1/cart';
+  static const String checkout = '/v1/orders/checkout';
+  static const String orders = '/v1/orders';
 }
+
