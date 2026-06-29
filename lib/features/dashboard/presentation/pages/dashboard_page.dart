@@ -7,6 +7,7 @@ import '../widgets/product_card.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../cart/data/presentation/providers/cart_provider.dart';
+import '../../../../core/routes/app_router.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -33,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().fetchProducts();
-      context.read<CartProvider>().fetchCart(); // ambil data cart untuk badge
+      context.read<CartProvider>().fetchCart(); // fetch cart untuk badge
     });
   }
 
@@ -99,7 +100,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Column(
       children: [
-        // Top Bar: Theme Switcher
+        // Top bar dengan theme switch
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
@@ -126,7 +127,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ),
-        // Search Bar
+        // Search bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
@@ -219,6 +220,7 @@ class _DashboardPageState extends State<DashboardPage> {
       children: [
         const Icon(Icons.error_outline, size: 48, color: Colors.red),
         Text(provider.error ?? 'Terjadi kesalahan'),
+        const SizedBox(height: 16),
         ElevatedButton(
           onPressed: () => provider.fetchProducts(),
           child: const Text('Coba Lagi'),
@@ -269,7 +271,13 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildBottomNavigationBar(int cartCount) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
-      onTap: (index) => setState(() => _selectedIndex = index),
+      onTap: (index) {
+        if (index == 1) {
+          Navigator.pushNamed(context, AppRouter.cart);
+        } else {
+          setState(() => _selectedIndex = index);
+        }
+      },
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColors.primary,
       items: [

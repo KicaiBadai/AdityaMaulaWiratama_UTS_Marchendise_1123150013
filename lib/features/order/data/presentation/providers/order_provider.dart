@@ -99,7 +99,10 @@ class OrderProvider extends ChangeNotifier {
     _paymentCheckStatus = PaymentCheckStatus.idle;
     notifyListeners();
 
-    _paymentPollingTimer = Timer.periodic(const Duration(seconds: 5), (
+    // Jalankan pengecekan status pertama kali secara instan tanpa menunggu timer
+    checkPaymentStatus(orderId);
+
+    _paymentPollingTimer = Timer.periodic(const Duration(seconds: 3), (
       timer,
     ) async {
       await checkPaymentStatus(orderId);

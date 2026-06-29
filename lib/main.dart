@@ -12,8 +12,13 @@ import 'core/providers/theme_provider.dart'; // Pastikan path ini benar
 import 'features/order/data/presentation/providers/order_provider.dart';
 import 'features/cart/data/presentation/providers/cart_provider.dart';
 
+import 'core/services/global_institute_pay_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Deep Link Service
+  await GlobalInstitutePayService().init();
 
   // Inisialisasi Firebase
   try {

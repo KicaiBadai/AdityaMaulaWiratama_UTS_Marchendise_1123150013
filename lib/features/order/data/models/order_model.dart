@@ -61,6 +61,32 @@ class OrderModel {
     this.gopayDeeplink,
   });
 
+  OrderModel copyWith({
+    int? id,
+    double? totalAmount,
+    String? status,
+    String? shippingAddress,
+    String? notes,
+    String? paymentMethod,
+    List<OrderItemModel>? items,
+    String? createdAt,
+    String? vaNumber,
+    String? gopayDeeplink,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      totalAmount: totalAmount ?? this.totalAmount,
+      status: status ?? this.status,
+      shippingAddress: shippingAddress ?? this.shippingAddress,
+      notes: notes ?? this.notes,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      items: items ?? this.items,
+      createdAt: createdAt ?? this.createdAt,
+      vaNumber: vaNumber ?? this.vaNumber,
+      gopayDeeplink: gopayDeeplink ?? this.gopayDeeplink,
+    );
+  }
+
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final itemsList = (json['items'] as List<dynamic>? ?? [])
         .map((e) => OrderItemModel.fromJson(e as Map<String, dynamic>))

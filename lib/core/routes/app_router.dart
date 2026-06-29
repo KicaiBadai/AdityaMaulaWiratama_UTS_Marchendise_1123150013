@@ -91,6 +91,10 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const AuthGuard(child: DashboardPage()),
         );
+      case cart:
+        return MaterialPageRoute(
+          builder: (_) => const AuthGuard(child: CartPage()),
+        );
       case checkout:
         return MaterialPageRoute(
           builder: (_) => const AuthGuard(child: CheckoutPage()),
